@@ -23,17 +23,17 @@ RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 # Copy PHP configuration
-COPY php.ini /usr/local/etc/php/php.ini
+COPY docker/php/php.ini /usr/local/etc/php/php.ini
 
 # Configure Nginx
 RUN rm /etc/nginx/sites-enabled/default
-COPY ../nginx/default.conf /etc/nginx/sites-enabled/default
+COPY docker/nginx/default.conf /etc/nginx/sites-enabled/default
 
 # Create necessary directories
 RUN mkdir -p /var/log/supervisor
 
 # Copy supervisor configuration
-COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+COPY docker/php/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 # Set working directory
 WORKDIR /var/www/html
