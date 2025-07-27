@@ -1,4 +1,4 @@
-.PHONY: help setup up down logs shell-backend shell-frontend migrate fresh build
+.PHONY: help setup up down logs shell migrate fresh build
 
 # デフォルトターゲット
 help:
@@ -7,8 +7,7 @@ help:
 	@echo "  make up             - コンテナ起動"
 	@echo "  make down           - コンテナ停止"
 	@echo "  make logs           - ログ表示"
-	@echo "  make shell-backend  - バックエンドコンテナにログイン"
-	@echo "  make shell-frontend - フロントエンドコンテナにログイン"
+	@echo "  make shell          - アプリケーションコンテナにログイン"
 	@echo "  make migrate        - マイグレーション実行"
 	@echo "  make fresh          - データベースリフレッシュ"
 	@echo "  make build          - コンテナ再ビルド"
@@ -41,12 +40,6 @@ setup:
 		echo "✓ Laravel .envを設定しました"; \
 	fi
 	
-	# Vue.jsプロジェクトの作成
-	@if [ ! -f frontend/package.json ]; then \
-		echo "Vue.jsプロジェクトを作成中..."; \
-		cd frontend && npm create vue@latest . -- --ts --jsx --router --pinia --vitest --eslint; \
-		echo "✓ Vue.jsプロジェクトを作成しました"; \
-	fi
 	
 	# コンテナビルドと起動
 	@echo "コンテナをビルド中..."
@@ -64,8 +57,7 @@ setup:
 	
 	@echo ""
 	@echo "=== セットアップが完了しました！ ==="
-	@echo "フロントエンド: http://my-receipt.localhost"
-	@echo "バックエンドAPI: http://my-receipt.localhost/api"
+	@echo "アプリケーション: http://my-receipt.localhost"
 	@echo ""
 
 # コンテナ起動
@@ -82,13 +74,9 @@ down:
 logs:
 	docker compose logs -f
 
-# バックエンドコンテナにログイン
-shell-backend:
+# アプリケーションコンテナにログイン
+shell:
 	docker compose exec backend bash
-
-# フロントエンドコンテナにログイン
-shell-frontend:
-	docker compose exec frontend sh
 
 # マイグレーション実行
 migrate:
