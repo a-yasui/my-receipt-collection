@@ -8,10 +8,10 @@ This is a cooking recipe management site (料理メモサイト) that focuses on
 
 ## Tech Stack
 
-- **Frontend**: Vue.js 3 + Composition API
+- **Frontend**: Vue.js 3 + Composition API (Node.js 24)
 - **Backend**: PHP 8.3 (Laravel)
-- **Database**: MySQL 8.5
-- **Infrastructure**: Docker + Docker Compose
+- **Database**: MySQL 8.4
+- **Infrastructure**: Docker + Docker Compose (without version field)
 - **Reverse Proxy**: Traefik (running externally)
 - **Styling**: Tailwind CSS or Bootstrap
 
@@ -83,13 +83,15 @@ make shell-frontend
 ## Architecture Overview
 
 ### Infrastructure
-- **External Network**: `degg-develop-net` (shared with Traefik)
+- **Networks**:
+  - `degg-develop-net` (external, for Traefik routing)
+  - `my-receipt-net` (internal, for service communication)
 - **Access URL**: http://my-receipt.localhost
 - **Container Names**:
-  - `my-receipt-backend` (PHP 8.3 + Nginx)
-  - `my-receipt-frontend` (Node.js + Vite)
-  - `my-receipt-mysql` (MySQL 8.5)
-  - `my-receipt-redis` (Redis 7)
+  - `my-receipt-backend` (PHP 8.3 + Nginx) - connected to both networks
+  - `my-receipt-frontend` (Node.js 24 + Vite) - connected to both networks
+  - `my-receipt-mysql` (MySQL 8.4) - internal network only
+  - `my-receipt-redis` (Redis 7) - internal network only
 
 ### Database Structure
 The system uses a hierarchical recipe structure where:
@@ -164,6 +166,10 @@ Use the `favorite_ingredients` table to provide suggestions based on usage frequ
 ### Recipe Search
 Implement full-text search on recipe titles and filter by tags.
 
+### Docker Compose Configuration
+- No `version` field in docker-compose.yml (not required in recent Docker versions)
+- Dual network architecture: external network for Traefik routing, internal network for service communication
+
 ## Environment Setup
 
 ### Prerequisites
@@ -172,11 +178,13 @@ Implement full-text search on recipe titles and filter by tags.
 
 ### Initial Setup
 Run `make setup` to automatically:
-1. Create Laravel project if not exists
+1. Configure Laravel project environment
 2. Create Vue.js project if not exists
 3. Build and start all containers
 4. Run database migrations
 5. Generate Laravel APP_KEY
+
+Note: Laravel project is already included in the `backend/` directory.
 
 ### Directory Structure
 ```
