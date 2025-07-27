@@ -39,3 +39,6 @@ Thumbs.db
 # Docker
 mysql_data/
 redis_data/.claude/settings.local.json
+
+# Claude Custom settings
+.claude/settings.local.json
