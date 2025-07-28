@@ -8,12 +8,13 @@ This is a cooking recipe management site (料理メモサイト) that focuses on
 
 ## Tech Stack
 
-- **Frontend**: Vue.js 3 + Composition API (Node.js 24)
+- **Full Stack**: Laravel + Vue.js 3 (統合構成)
 - **Backend**: PHP 8.3 (Laravel)
+- **Frontend**: Vue.js 3 + Composition API (Laravel-Vite統合)
 - **Database**: MySQL 8.4
 - **Infrastructure**: Docker + Docker Compose (without version field)
 - **Reverse Proxy**: Traefik (running externally)
-- **Styling**: Tailwind CSS or Bootstrap
+- **Styling**: Tailwind CSS
 
 ## Key Commands
 
@@ -36,7 +37,7 @@ docker compose logs -f [service_name]
 
 # Execute commands in containers
 docker compose exec backend php artisan [command]
-docker compose exec frontend npm run [command]
+docker compose exec backend npm run [command]
 ```
 
 ### Laravel Development
@@ -55,29 +56,26 @@ docker compose exec backend php artisan test
 docker compose exec backend php artisan cache:clear
 docker compose exec backend php artisan config:clear
 
-# Access backend shell
-make shell-backend
+# Access application shell
+make shell
 ```
 
 ### Vue.js Development
 ```bash
 # Install dependencies (done automatically on container start)
-docker compose exec frontend npm install
+docker compose exec backend npm install
 
-# Development server (runs automatically)
-# Manual restart: docker compose restart frontend
+# Development server (runs automatically via supervisor)
+# Manual restart: docker compose exec backend npm run dev
 
 # Build for production
-docker compose exec frontend npm run build
+docker compose exec backend npm run build
 
 # Run tests
-docker compose exec frontend npm run test
+docker compose exec backend npm run test
 
 # Lint code
-docker compose exec frontend npm run lint
-
-# Access frontend shell
-make shell-frontend
+docker compose exec backend npm run lint
 ```
 
 ## Architecture Overview
@@ -88,8 +86,7 @@ make shell-frontend
   - `my-receipt-net` (internal, for service communication)
 - **Access URL**: http://my-receipt.localhost
 - **Container Names**:
-  - `my-receipt-backend` (PHP 8.3 + Nginx) - connected to both networks
-  - `my-receipt-frontend` (Node.js 24 + Vite) - connected to both networks
+  - `my-receipt-backend` (PHP 8.3 + Nginx + Node.js + Vite) - connected to both networks
   - `my-receipt-mysql` (MySQL 8.4) - internal network only
   - `my-receipt-redis` (Redis 7) - internal network only
 
@@ -116,16 +113,20 @@ RESTful API endpoints under `/api/`:
 
 ### Frontend Component Architecture
 ```
-src/
- components/
-    Recipe/          # Recipe-related components
-    Ingredient/      # Ingredient management
-    Step/           # Cooking steps
-    Common/         # Shared components
-    Layout/         # Page layout components
- views/              # Page components
- stores/             # State management
- router/             # Vue Router configuration
+backend/resources/
+ vue/
+    App.vue          # Main Vue application
+    components/
+       Recipe/       # Recipe-related components
+       Ingredient/   # Ingredient management
+       Step/         # Cooking steps
+       Common/       # Shared components
+       Layout/       # Page layout components
+    views/           # Page components
+    stores/          # State management
+    router/          # Vue Router configuration
+ js/
+    app.js           # Application entry point
 ```
 
 ## Development Phases
@@ -151,7 +152,7 @@ Current implementation follows these phases:
   ```
 - Frontend: Use Vue Test Utils and Vitest
   ```bash
-  docker compose exec frontend npm run test
+  docker compose exec backend npm run test
   ```
 - E2E: Consider Cypress for end-to-end testing
 
@@ -179,20 +180,23 @@ Implement full-text search on recipe titles and filter by tags.
 ### Initial Setup
 Run `make setup` to automatically:
 1. Configure Laravel project environment
-2. Create Vue.js project if not exists
-3. Build and start all containers
-4. Run database migrations
-5. Generate Laravel APP_KEY
+2. Build and start all containers
+3. Run database migrations
+4. Generate Laravel APP_KEY
 
-Note: Laravel project is already included in the `backend/` directory.
+Note: Laravel project is already included in the `backend/` directory. Vue.js is integrated via Laravel-Vite.
 
 ### Directory Structure
 ```
 my-cook-receipt/
-├── backend/          # Laravel project
-├── frontend/         # Vue.js project
+├── backend/          # Laravel + Vue.js統合プロジェクト
+│   ├── resources/
+│   │   ├── vue/     # Vue.jsコンポーネント
+│   │   ├── js/      # JavaScriptエントリポイント
+│   │   └── views/   # Bladeテンプレート
+│   └── vite.config.js # Vite設定
 ├── docker/           # Docker configurations
-│   ├── php/         # PHP/Nginx configs
+│   ├── php/         # PHP/Nginx/Node.js configs
 │   ├── mysql/       # MySQL initialization
 │   └── nginx/       # Nginx config
 ├── docker-compose.yml
